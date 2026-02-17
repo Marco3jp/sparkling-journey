@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #646cff;
+  --color-primary-hover: #535bf2;
+  --color-nav-active: #8888ff;
+  --color-background: #242424;
+  --color-background-light: #ffffff;
+  --color-foreground: rgba(255, 255, 255, 0.87);
+  --color-foreground-light: #213547;
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  a {
+    font-weight: 500;
+    color: var(--color-primary);
+    text-decoration: inherit;
+  }
+  a:hover {
+    color: var(--color-primary-hover);
+  }
+
+  h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+  }
+
+  button {
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background-color: #1a1a1a;
+    cursor: pointer;
+    transition: border-color 0.25s;
+  }
+  button:hover {
+    border-color: var(--color-primary);
+  }
+  button:focus,
+  button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 1em;
+    font-family: inherit;
+    padding: 0.6em 1em;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.2);
+    color: inherit;
+    min-height: 2.5em;
+    box-sizing: border-box;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  body {
+    color: var(--color-foreground-light);
+    background-color: var(--color-background-light);
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+  input,
+  select,
+  textarea {
+    border-color: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.04);
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(0, 0, 0, 0.45);
+  }
+}
