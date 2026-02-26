@@ -20,4 +20,5 @@ export const router = createBrowserRouter(
       <Route path="settings" element={<SettingsPage />} />
     </Route>,
   ),
+  { basename: import.meta.env.BASE_URL },
 );
