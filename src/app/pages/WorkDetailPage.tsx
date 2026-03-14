@@ -20,6 +20,35 @@ function filterTagsByQuery(tags: Tag[], query: string): Tag[] {
   );
 }
 
+function WorkTagNoteInput({
+  note,
+  onSave,
+}: {
+  note: string;
+  onSave: (nextNote: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState(note);
+
+  useEffect(() => {
+    setDraft(note);
+  }, [note]);
+
+  const handleBlur = () => {
+    if (draft === note) return;
+    void onSave(draft);
+  };
+
+  return (
+    <input
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={handleBlur}
+      placeholder="メモ"
+      className="w-[220px]"
+    />
+  );
+}
+
 export function WorkDetailPage() {
   const { uuid } = useParams<"uuid">();
   const { workRepository, tagRepository } = useDependencies();
@@ -97,8 +126,13 @@ export function WorkDetailPage() {
   const handleNoteChange = async (tagId: string, note: string) => {
     if (!uuid) return;
     try {
-      await updateWorkTagNote(uuid, tagId, note, workRepository);
-      reload();
+      const updatedWork = await updateWorkTagNote(
+        uuid,
+        tagId,
+        note,
+        workRepository,
+      );
+      setWork(updatedWork);
     } catch (err) {
       alert((err as Error).message);
     }
@@ -129,12 +163,10 @@ export function WorkDetailPage() {
                 className="mb-3 flex items-center gap-3"
               >
                 <Link to={`/tags/${wt.tag.uuid}`}>{wt.tag.name}</Link>
-                <input
-                  value={wt.note}
-                  onChange={(e) => handleNoteChange(wt.tag.uuid, e.target.value)}
-                  onBlur={(e) => handleNoteChange(wt.tag.uuid, e.target.value)}
-                  placeholder="メモ"
-                  className="w-[220px]"
+                <WorkTagNoteInput
+                  note={wt.note}
+                  onSave={(nextNote) =>
+                    handleNoteChange(wt.tag.uuid, nextNote)}
                 />
                 <button type="button" onClick={() => handleUnlink(wt.tag.uuid)}>
                   外す
