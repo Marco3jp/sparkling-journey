@@ -28,10 +28,17 @@ function WorkTagNoteInput({
   onSave: (nextNote: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(note);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setDraft(note);
   }, [note]);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  }, [draft]);
 
   const handleBlur = () => {
     if (draft === note) return;
@@ -39,12 +46,14 @@ function WorkTagNoteInput({
   };
 
   return (
-    <input
+    <textarea
+      ref={textareaRef}
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={handleBlur}
       placeholder="メモ"
-      className="w-[220px]"
+      className="w-full min-h-[2.5em] resize-y overflow-hidden leading-relaxed"
+      rows={1}
     />
   );
 }
@@ -160,14 +169,18 @@ export function WorkDetailPage() {
             {work.workTags.map((wt) => (
               <li
                 key={wt.tag.uuid}
-                className="mb-3 flex items-center gap-3"
+                className="mb-3 flex items-start gap-3"
               >
-                <Link to={`/tags/${wt.tag.uuid}`}>{wt.tag.name}</Link>
-                <WorkTagNoteInput
-                  note={wt.note}
-                  onSave={(nextNote) =>
-                    handleNoteChange(wt.tag.uuid, nextNote)}
-                />
+                <Link to={`/tags/${wt.tag.uuid}`} className="shrink-0 pt-2">
+                  {wt.tag.name}
+                </Link>
+                <div className="min-w-0 flex-1">
+                  <WorkTagNoteInput
+                    note={wt.note}
+                    onSave={(nextNote) =>
+                      handleNoteChange(wt.tag.uuid, nextNote)}
+                  />
+                </div>
                 <button type="button" onClick={() => handleUnlink(wt.tag.uuid)}>
                   外す
                 </button>
