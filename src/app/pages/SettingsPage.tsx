@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useDependencies } from "../contexts/AppDependenciesProvider";
+import { useDependencies } from "../contexts/useDependencies";
 import { exportData } from "../../domain/usecases/exportData";
 import { previewImport } from "../../domain/usecases/previewImport";
 import { importData } from "../../domain/usecases/importData";
@@ -62,7 +62,9 @@ export function SettingsPage() {
     setPendingJson(null);
     setImportPreview(null);
     setImportError(null);
-    fileInputRef.current?.value && (fileInputRef.current.value = "");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const hasOverrides =

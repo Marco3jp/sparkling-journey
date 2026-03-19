@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { useDependencies } from "../contexts/AppDependenciesProvider";
+import { useDependencies } from "../contexts/useDependencies";
 import { searchByText } from "../../domain/usecases/searchByText";
 import type { SearchResult } from "../../domain/usecases/searchByText";
 

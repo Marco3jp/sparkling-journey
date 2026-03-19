@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useDependencies } from "../contexts/AppDependenciesProvider";
+import { useDependencies } from "../contexts/useDependencies";
 import { getWorkById } from "../../domain/usecases/getWorkById";
 import { listTags } from "../../domain/usecases/listTags";
 import { createTag } from "../../domain/usecases/createTag";

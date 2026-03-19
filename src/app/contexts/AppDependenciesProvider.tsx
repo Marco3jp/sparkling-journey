@@ -1,24 +1,9 @@
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from "react";
-import type { TagRepository } from "../../domain/repositories/TagRepository";
-import type { WorkRepository } from "../../domain/repositories/WorkRepository";
-import type { StaticFileSerializer } from "../../domain/serialization/StaticFileSerializer";
+import { useMemo, type ReactNode } from "react";
 import { LocalStorageGateway } from "../../infrastructure/storage/LocalStorageGateway";
 import { LocalStorageTagRepository } from "../../infrastructure/storage/LocalStorageTagRepository";
 import { LocalStorageWorkRepository } from "../../infrastructure/storage/LocalStorageWorkRepository";
 import { JsonStaticFileSerializer } from "../../infrastructure/storage/JsonStaticFileSerializer";
-
-export interface Dependencies {
-  tagRepository: TagRepository;
-  workRepository: WorkRepository;
-  serializer: StaticFileSerializer;
-}
-
-const DependenciesContext = createContext<Dependencies | null>(null);
+import { DependenciesContext, type Dependencies } from "./useDependencies";
 
 export function AppDependenciesProvider({ children }: { children: ReactNode }) {
   const deps = useMemo<Dependencies>(() => {
@@ -35,14 +20,4 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
       {children}
     </DependenciesContext.Provider>
   );
-}
-
-export function useDependencies(): Dependencies {
-  const ctx = useContext(DependenciesContext);
-  if (!ctx) {
-    throw new Error(
-      "useDependencies must be used within AppDependenciesProvider",
-    );
-  }
-  return ctx;
 }

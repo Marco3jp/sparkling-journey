@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useDependencies } from "../contexts/AppDependenciesProvider";
+import { useDependencies } from "../contexts/useDependencies";
 import { listWorks } from "../../domain/usecases/listWorks";
 import { listTags } from "../../domain/usecases/listTags";
 import { createWork } from "../../domain/usecases/createWork";
@@ -18,14 +18,14 @@ export function HomePage() {
   const [tagName, setTagName] = useState("");
   const [tagDesc, setTagDesc] = useState("");
 
-  const load = () => {
+  const load = useCallback(() => {
     listWorks(workRepository).then(setWorks);
     listTags(tagRepository).then(setTags);
-  };
+  }, [workRepository, tagRepository]);
 
   useEffect(() => {
     load();
-  }, [workRepository, tagRepository]);
+  }, [load]);
 
   const handleCreateWork = async (e: React.FormEvent) => {
     e.preventDefault();
