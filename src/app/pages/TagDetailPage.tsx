@@ -43,7 +43,7 @@ export function TagDetailPage() {
 
     if (!window.confirm(message)) return;
 
-    await deleteTag(uuid, tagRepository);
+    await deleteTag(uuid, tagRepository, workRepository);
     navigate("/");
   };
 
