@@ -1,9 +1,48 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDependencies } from "../contexts/useDependencies";
 import { getTagById } from "../../domain/usecases/getTagById";
 import { deleteTag } from "../../domain/usecases/deleteTag";
+import { updateTag } from "../../domain/usecases/updateTag";
 import type { Tag } from "../../domain/models/Tag";
+
+function TagDescriptionInput({
+  description,
+  onSave,
+}: {
+  description: string;
+  onSave: (next: string) => Promise<void>;
+}) {
+  const [draft, setDraft] = useState(description);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    setDraft(description);
+  }, [description]);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  }, [draft]);
+
+  const handleBlur = () => {
+    if (draft === description) return;
+    void onSave(draft);
+  };
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={handleBlur}
+      placeholder="説明を入力（任意）"
+      className="w-full min-h-[2.5em] resize-y overflow-hidden leading-relaxed"
+      rows={1}
+    />
+  );
+}
 
 export function TagDetailPage() {
   const { uuid } = useParams<"uuid">();
@@ -47,6 +86,16 @@ export function TagDetailPage() {
     navigate("/");
   };
 
+  const handleDescriptionSave = async (nextDescription: string) => {
+    if (!tag) return;
+    const updated = await updateTag(tagRepository, {
+      uuid: tag.uuid,
+      name: tag.name,
+      description: nextDescription,
+    });
+    setTag(updated);
+  };
+
   if (!uuid) return <p>Invalid tag.</p>;
   if (tag === null) return <p>Loading…</p>;
 
@@ -66,7 +115,13 @@ export function TagDetailPage() {
           削除
         </button>
       </div>
-      {tag.description ? <p>{tag.description}</p> : null}
+      <div className="mb-6">
+        <p className="text-sm text-white/60 mb-1">説明</p>
+        <TagDescriptionInput
+          description={tag.description}
+          onSave={handleDescriptionSave}
+        />
+      </div>
       <section>
         <h2>このタグが付いた作品</h2>
         {linkedWorks.length === 0 ? (
