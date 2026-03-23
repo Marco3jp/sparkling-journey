@@ -22,7 +22,7 @@ const screenshotsDir = join(rootDir, "screenshots");
 // --- シードデータ ---
 
 const seedTags = [
-  { uuid: "t1", name: "Fantasy", description: "魔法と剣の世界観を持つ作品" },
+  { uuid: "t1", name: "Fantasy", description: "魔法と剣の世界観を持つ作品 参考: https://example.com/fantasy-guide" },
   { uuid: "t2", name: "SF", description: "宇宙・テクノロジーをテーマにした作品" },
   { uuid: "t3", name: "日記", description: "日々の出来事を記録した作品" },
   { uuid: "t4", name: "短編", description: "短い読み切り作品" },
@@ -34,7 +34,7 @@ const seedWorks = [
     uuid: "w1",
     title: "異世界ファンタジー大作",
     workTags: [
-      { tag: seedTags[0], note: "長編シリーズ。主人公は高校生の転生者" },
+      { tag: seedTags[0], note: "長編シリーズ。主人公は高校生の転生者 https://example.com/work/w1" },
       { tag: seedTags[4], note: "ヒロインとの掛け合いが面白い" },
     ],
   },
