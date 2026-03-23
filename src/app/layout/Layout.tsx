@@ -50,7 +50,7 @@ export function Layout() {
           <button type="submit">Search</button>
         </form>
       </header>
-      <main className="flex-1 p-4 max-w-3xl mx-auto w-full box-border">
+      <main className="flex-1 p-4 max-w-4xl mx-auto w-full box-border">
         <Outlet />
       </main>
     </div>
