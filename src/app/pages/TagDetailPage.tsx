@@ -5,6 +5,7 @@ import { getTagById } from "../../domain/usecases/getTagById";
 import { deleteTag } from "../../domain/usecases/deleteTag";
 import { updateTag } from "../../domain/usecases/updateTag";
 import type { Tag } from "../../domain/models/Tag";
+import { LinkifiedText } from "../components/LinkifiedText";
 
 function TagDescriptionInput({
   description,
@@ -14,6 +15,7 @@ function TagDescriptionInput({
   onSave: (next: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(description);
+  const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -24,12 +26,34 @@ function TagDescriptionInput({
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-  }, [draft]);
+  }, [draft, isEditing]);
 
   const handleBlur = () => {
-    if (draft === description) return;
-    void onSave(draft);
+    setIsEditing(false);
+    if (draft !== description) {
+      void onSave(draft);
+    }
   };
+
+  if (!isEditing) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setIsEditing(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setIsEditing(true);
+        }}
+        className="w-full min-h-[2.5em] leading-relaxed cursor-text whitespace-pre-wrap"
+      >
+        {draft ? (
+          <LinkifiedText text={draft} />
+        ) : (
+          <span className="text-white/40">説明を入力（任意）</span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <textarea
@@ -37,6 +61,7 @@ function TagDescriptionInput({
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={handleBlur}
+      autoFocus
       placeholder="説明を入力（任意）"
       className="w-full min-h-[2.5em] resize-y overflow-hidden leading-relaxed"
       rows={1}

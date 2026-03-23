@@ -9,6 +9,7 @@ import { unlinkTagFromWork } from "../../domain/usecases/unlinkTagFromWork";
 import { updateWorkTagNote } from "../../domain/usecases/updateWorkTagNote";
 import type { Work } from "../../domain/models/Work";
 import type { Tag } from "../../domain/models/Tag";
+import { LinkifiedText } from "../components/LinkifiedText";
 
 function filterTagsByQuery(tags: Tag[], query: string): Tag[] {
   const q = query.trim().toLocaleLowerCase();
@@ -28,6 +29,7 @@ function WorkTagNoteInput({
   onSave: (nextNote: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(note);
+  const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -38,12 +40,34 @@ function WorkTagNoteInput({
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-  }, [draft]);
+  }, [draft, isEditing]);
 
   const handleBlur = () => {
-    if (draft === note) return;
-    void onSave(draft);
+    setIsEditing(false);
+    if (draft !== note) {
+      void onSave(draft);
+    }
   };
+
+  if (!isEditing) {
+    return (
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => setIsEditing(true)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") setIsEditing(true);
+        }}
+        className="w-full min-h-[2.5em] leading-relaxed cursor-text whitespace-pre-wrap"
+      >
+        {draft ? (
+          <LinkifiedText text={draft} />
+        ) : (
+          <span className="text-white/40">メモ</span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <textarea
@@ -51,6 +75,7 @@ function WorkTagNoteInput({
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={handleBlur}
+      autoFocus
       placeholder="メモ"
       className="w-full min-h-[2.5em] resize-y overflow-hidden leading-relaxed"
       rows={1}

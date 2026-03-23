@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useDependencies } from "../contexts/useDependencies";
 import { searchByText } from "../../domain/usecases/searchByText";
 import type { SearchResult } from "../../domain/usecases/searchByText";
+import { LinkifiedText } from "../components/LinkifiedText";
 
 export function SearchPage() {
   const [searchParams] = useSearchParams();
@@ -43,7 +44,9 @@ export function SearchPage() {
             {result.tags.map((t) => (
               <li key={t.uuid} className="mb-2">
                 <Link to={`/tags/${t.uuid}`}>{t.name}</Link>
-                {t.description ? ` — ${t.description}` : null}
+                {t.description ? (
+                  <> — <LinkifiedText text={t.description} /></>
+                ) : null}
               </li>
             ))}
           </ul>
