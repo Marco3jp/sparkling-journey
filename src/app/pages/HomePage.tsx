@@ -99,35 +99,37 @@ export function HomePage() {
           </button>
         </form>
       )}
-      <section className="mb-6">
-        <h2>作品</h2>
-        {works.length === 0 ? (
-          <p>作品がありません。</p>
-        ) : (
-          <ul className="list-none p-0">
-            {works.map((w) => (
-              <li key={w.uuid} className="mb-2">
-                <Link to={`/works/${w.uuid}`}>{w.title}</Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section>
-        <h2>タグ</h2>
-        {tags.length === 0 ? (
-          <p>タグがありません。</p>
-        ) : (
-          <ul className="list-none p-0">
-            {tags.map((t) => (
-              <li key={t.uuid} className="mb-2">
-                <Link to={`/tags/${t.uuid}`}>{t.name}</Link>
-                {t.description ? ` — ${t.description}` : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section>
+          <h2>作品</h2>
+          {works.length === 0 ? (
+            <p>作品がありません。</p>
+          ) : (
+            <ul className="list-none p-0">
+              {works.map((w) => (
+                <li key={w.uuid} className="mb-2">
+                  <Link to={`/works/${w.uuid}`}>{w.title}</Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section>
+          <h2>タグ</h2>
+          {tags.length === 0 ? (
+            <p>タグがありません。</p>
+          ) : (
+            <ul className="list-none p-0">
+              {tags.map((t) => (
+                <li key={t.uuid} className="mb-2">
+                  <Link to={`/tags/${t.uuid}`}>{t.name}</Link>
+                  {t.description ? ` — ${t.description}` : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
