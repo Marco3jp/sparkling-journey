@@ -71,23 +71,26 @@ npm run screenshot
 ```bash
 git add screenshots/
 git commit -m "screenshot: update screenshots"
+git rev-parse HEAD   # ← このハッシュを次のステップで使う
 ```
 
 ### 3. PR 説明にスクリーンショットを貼り付ける
 
 PR の説明 (ManagePullRequest ツール / `body`) に以下の形式で画像を埋め込んでください。
-`BRANCH_NAME` は現在のブランチ名、`REPO` は `オーナー/リポジトリ名` に置き換えてください。
+`COMMIT_HASH` は直前のコミットのフルハッシュ、`REPO` は `オーナー/リポジトリ名` に置き換えてください。
+
+> **ブランチ名ではなくコミットハッシュを使う理由**: ブランチ名を使うと PR マージ後にブランチが削除されたときリンクが切れます。コミットハッシュは永続するため、マージ後も画像が表示され続けます。
 
 ```markdown
 ## スクリーンショット
 
 | ホーム | 作品詳細 |
 |---|---|
-| ![home](https://raw.githubusercontent.com/REPO/BRANCH_NAME/screenshots/home.png) | ![work-detail](https://raw.githubusercontent.com/REPO/BRANCH_NAME/screenshots/work-detail.png) |
+| ![home](https://raw.githubusercontent.com/REPO/COMMIT_HASH/screenshots/home.png) | ![work-detail](https://raw.githubusercontent.com/REPO/COMMIT_HASH/screenshots/work-detail.png) |
 
 | タグ詳細 | 検索 | 設定 |
 |---|---|---|
-| ![tag-detail](https://raw.githubusercontent.com/REPO/BRANCH_NAME/screenshots/tag-detail.png) | ![search](https://raw.githubusercontent.com/REPO/BRANCH_NAME/screenshots/search.png) | ![settings](https://raw.githubusercontent.com/REPO/BRANCH_NAME/screenshots/settings.png) |
+| ![tag-detail](https://raw.githubusercontent.com/REPO/COMMIT_HASH/screenshots/tag-detail.png) | ![search](https://raw.githubusercontent.com/REPO/COMMIT_HASH/screenshots/search.png) | ![settings](https://raw.githubusercontent.com/REPO/COMMIT_HASH/screenshots/settings.png) |
 ```
 
 > 変更していないページのスクリーンショットも含めることで、意図しないレイアウト崩れが発生していないことをレビュアーが一目で確認できます。
