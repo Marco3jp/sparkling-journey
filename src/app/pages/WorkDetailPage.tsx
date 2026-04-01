@@ -58,7 +58,7 @@ function WorkTagNoteInput({
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") setIsEditing(true);
         }}
-        className="w-full min-h-[2.5em] leading-relaxed cursor-text whitespace-pre-wrap"
+        className="w-full leading-relaxed cursor-text whitespace-pre-wrap"
       >
         {draft ? (
           <LinkifiedText text={draft} />
@@ -194,9 +194,9 @@ export function WorkDetailPage() {
             {work.workTags.map((wt) => (
               <li
                 key={wt.tag.uuid}
-                className="mb-3 flex items-start gap-3"
+                className="mb-3 flex items-center gap-3"
               >
-                <Link to={`/tags/${wt.tag.uuid}`} className="shrink-0 pt-2">
+                <Link to={`/tags/${wt.tag.uuid}`} className="shrink-0">
                   {wt.tag.name}
                 </Link>
                 <div className="min-w-0 flex-1">
