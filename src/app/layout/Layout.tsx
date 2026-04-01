@@ -21,7 +21,7 @@ export function Layout() {
           <NavLink
             to="/"
             className={({ isActive }) =>
-              isActive ? "text-[#8888ff] font-semibold" : undefined
+              isActive ? "text-theme-dark font-semibold" : undefined
             }
             end
           >
@@ -30,7 +30,7 @@ export function Layout() {
           <NavLink
             to="/settings"
             className={({ isActive }) =>
-              isActive ? "text-[#8888ff] font-semibold" : undefined
+              isActive ? "text-theme-dark font-semibold" : undefined
             }
           >
             Settings
