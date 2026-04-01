@@ -7,6 +7,7 @@ import { createWork } from "../../domain/usecases/createWork";
 import { createTag } from "../../domain/usecases/createTag";
 import type { Work } from "../../domain/models/Work";
 import type { Tag } from "../../domain/models/Tag";
+import { LinkifiedText } from "../components/LinkifiedText";
 
 export function HomePage() {
   const { workRepository, tagRepository } = useDependencies();
@@ -123,7 +124,9 @@ export function HomePage() {
               {tags.map((t) => (
                 <li key={t.uuid} className="mb-2">
                   <Link to={`/tags/${t.uuid}`}>{t.name}</Link>
-                  {t.description ? ` — ${t.description}` : null}
+                  {t.description ? (
+                    <> — <LinkifiedText text={t.description} /></>
+                  ) : null}
                 </li>
               ))}
             </ul>
