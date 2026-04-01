@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #646cff;
-  --color-primary-hover: #535bf2;
-  --color-nav-active: #8888ff;
+  --color-theme: #29b6f6;
+  --color-theme-dark: #0288d1;
   --color-background: #242424;
   --color-background-light: #ffffff;
   --color-foreground: rgba(255, 255, 255, 0.87);
@@ -35,11 +34,11 @@
 
   a {
     font-weight: 500;
-    color: var(--color-primary);
+    color: var(--color-theme);
     text-decoration: inherit;
   }
   a:hover {
-    color: var(--color-primary-hover);
+    color: var(--color-theme-dark);
   }
 
   h1 {
@@ -59,7 +58,7 @@
     transition: border-color 0.25s;
   }
   button:hover {
-    border-color: var(--color-primary);
+    border-color: var(--color-theme);
   }
   button:focus,
   button:focus-visible {
@@ -82,7 +81,7 @@
   input:focus,
   select:focus,
   textarea:focus {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-theme);
     outline-offset: 1px;
   }
   input::placeholder,
@@ -97,7 +96,7 @@
     background-color: var(--color-background-light);
   }
   a:hover {
-    color: #747bff;
+    color: var(--color-theme-dark);
   }
   button {
     background-color: #f9f9f9;
