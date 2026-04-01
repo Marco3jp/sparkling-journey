@@ -120,6 +120,7 @@ async function main() {
 
     const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
+      colorScheme: "dark",
     });
 
     // localStorage にシードデータを注入
