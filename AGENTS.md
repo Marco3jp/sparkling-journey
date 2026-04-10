@@ -129,6 +129,53 @@ LocalStorage のキー:
 
 ---
 
+## テストの書き方規約
+
+テストファイルは `tests/` ディレクトリに配置し、`tests/**/*.test.ts` のパターンで Vitest が実行します。
+
+### フィクスチャ（テストデータ）とテストコードの分離
+
+テストデータ（`Tag`・`Work` などのサンプルオブジェクト）は **ファイル先頭の `const` として定義**し、`it()` や `beforeEach()` の中にインラインで書かないでください。
+
+```ts
+// ✅ 良い例：ファイル先頭にフィクスチャを定義する
+const tagA: Tag = { uuid: "t1", name: "Fantasy", description: "..." };
+const baseWork: Work = { uuid: "w1", title: "Work 1", workTags: [] };
+
+describe("...", () => {
+  it("...", async () => {
+    const repo = new InMemoryTagRepository([tagA]);
+    // ...
+  });
+});
+
+// ❌ 悪い例：it() の中にデータを書く
+describe("...", () => {
+  it("...", async () => {
+    const tag = { uuid: "t1", name: "Fantasy", description: "..." }; // ← NG
+    const repo = new InMemoryTagRepository([tag]);
+    // ...
+  });
+});
+```
+
+### describe の単位
+
+- 1 つのユースケース・クラス・メソッドごとに `describe` を分ける
+- 複数の関連する機能を 1 ファイルにまとめる場合も、それぞれ独立した `describe` ブロックにする（1 つの `describe` にまとめない）
+
+### テストファイルの配置
+
+| 対象 | 配置先 |
+|---|---|
+| ユースケース | `tests/domain/usecases/` |
+| インフラ層 (Storage) | `tests/infrastructure/storage/` |
+| ヘルパー | `tests/helpers/` |
+
+追加ケースは既存ファイルに統合してください。「Additional」「EdgeCases」などサフィックス付きの分離ファイルを作らないでください。
+
+---
+
 ## 改修時に必要ならやること
 
 ### AGENTS.md の更新

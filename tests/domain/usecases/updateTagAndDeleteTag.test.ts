@@ -11,6 +11,33 @@ import type { Work } from "../../../src/domain/models/Work";
 const tagA: Tag = { uuid: "t1", name: "Tag A", description: "desc A" };
 const tagB: Tag = { uuid: "t2", name: "Tag B", description: "desc B" };
 
+const workWithBothTags: Work = {
+  uuid: "w1",
+  title: "Work 1",
+  workTags: [
+    { tag: tagA, note: "noteA" },
+    { tag: tagB, note: "noteB" },
+  ],
+};
+
+const workWithTagA: Work = {
+  uuid: "w1",
+  title: "Work A",
+  workTags: [{ tag: tagA, note: "na" }],
+};
+
+const workWithTagASecond: Work = {
+  uuid: "w2",
+  title: "Work B",
+  workTags: [{ tag: tagA, note: "nb" }],
+};
+
+const workNoTag: Work = {
+  uuid: "w1",
+  title: "Work 1",
+  workTags: [],
+};
+
 describe("updateTag", () => {
   it("name と description を trim して更新する", async () => {
     const tagRepo = new InMemoryTagRepository([structuredClone(tagA)]);
@@ -80,19 +107,11 @@ describe("deleteTag", () => {
   });
 
   it("削除したタグが紐づいていた Work からも除去される", async () => {
-    const work: Work = {
-      uuid: "w1",
-      title: "Work 1",
-      workTags: [
-        { tag: tagA, note: "noteA" },
-        { tag: tagB, note: "noteB" },
-      ],
-    };
     const tagRepo = new InMemoryTagRepository([
       structuredClone(tagA),
       structuredClone(tagB),
     ]);
-    const workRepo = new InMemoryWorkRepository([structuredClone(work)]);
+    const workRepo = new InMemoryWorkRepository([structuredClone(workWithBothTags)]);
 
     await deleteTag("t1", tagRepo, workRepo);
 
@@ -102,20 +121,10 @@ describe("deleteTag", () => {
   });
 
   it("複数の Work に紐づいていても全て除去される", async () => {
-    const workA: Work = {
-      uuid: "w1",
-      title: "Work A",
-      workTags: [{ tag: tagA, note: "na" }],
-    };
-    const workB: Work = {
-      uuid: "w2",
-      title: "Work B",
-      workTags: [{ tag: tagA, note: "nb" }],
-    };
     const tagRepo = new InMemoryTagRepository([structuredClone(tagA)]);
     const workRepo = new InMemoryWorkRepository([
-      structuredClone(workA),
-      structuredClone(workB),
+      structuredClone(workWithTagA),
+      structuredClone(workWithTagASecond),
     ]);
 
     await deleteTag("t1", tagRepo, workRepo);
@@ -127,11 +136,6 @@ describe("deleteTag", () => {
   });
 
   it("どの Work にも紐づいていないタグでも削除できる", async () => {
-    const workNoTag: Work = {
-      uuid: "w1",
-      title: "Work 1",
-      workTags: [],
-    };
     const tagRepo = new InMemoryTagRepository([structuredClone(tagA)]);
     const workRepo = new InMemoryWorkRepository([structuredClone(workNoTag)]);
 

@@ -9,6 +9,21 @@ const tagB: Tag = { uuid: "t2", name: "SF", description: "" };
 
 const workA: Work = { uuid: "w1", title: "異世界ファンタジー", workTags: [] };
 const workB: Work = { uuid: "w2", title: "宇宙船の旅", workTags: [] };
+const workWithTagA: Work = {
+  uuid: "w3",
+  title: "ただの日記",
+  workTags: [{ tag: tagA, note: "長編 Fantasy" }],
+};
+const workWithTagAUpdated: Work = {
+  uuid: "w1",
+  title: "異世界ファンタジー",
+  workTags: [{ tag: tagA, note: "長編" }],
+};
+const workWithTagBShort: Work = {
+  uuid: "w4",
+  title: "SFホラー",
+  workTags: [{ tag: tagB, note: "短編" }],
+};
 
 let storage: InMemoryStorage;
 let repo: LocalStorageWorkRepository;
@@ -124,13 +139,8 @@ describe("LocalStorageWorkRepository#update", () => {
 
   it("workTags を含む状態で更新できる", async () => {
     await repo.create(workA);
-    const withTags: Work = {
-      uuid: "w1",
-      title: "異世界ファンタジー",
-      workTags: [{ tag: tagA, note: "長編" }],
-    };
 
-    await repo.update(withTags);
+    await repo.update(workWithTagAUpdated);
 
     const result = await repo.getById("w1");
     expect(result?.workTags).toHaveLength(1);
@@ -168,16 +178,8 @@ describe("LocalStorageWorkRepository#searchByText", () => {
   beforeEach(async () => {
     await repo.create(workA);
     await repo.create(workB);
-    await repo.create({
-      uuid: "w3",
-      title: "ただの日記",
-      workTags: [{ tag: tagA, note: "長編 Fantasy" }],
-    });
-    await repo.create({
-      uuid: "w4",
-      title: "SFホラー",
-      workTags: [{ tag: tagB, note: "短編" }],
-    });
+    await repo.create(workWithTagA);
+    await repo.create(workWithTagBShort);
   });
 
   it("空文字は全件返す", async () => {

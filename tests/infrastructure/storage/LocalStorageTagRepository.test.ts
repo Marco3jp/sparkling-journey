@@ -5,6 +5,7 @@ import type { Tag } from "../../../src/domain/models/Tag";
 
 const tagA: Tag = { uuid: "t1", name: "Fantasy", description: "魔法の物語" };
 const tagB: Tag = { uuid: "t2", name: "SF", description: "宇宙の旅" };
+const tagC: Tag = { uuid: "t3", name: "Diary", description: "日記メモ" };
 
 let storage: InMemoryStorage;
 let repo: LocalStorageTagRepository;
@@ -149,7 +150,7 @@ describe("LocalStorageTagRepository#searchByText", () => {
   beforeEach(async () => {
     await repo.create(tagA);
     await repo.create(tagB);
-    await repo.create({ uuid: "t3", name: "Diary", description: "日記メモ" });
+    await repo.create(tagC);
   });
 
   it("空文字は全件返す", async () => {
