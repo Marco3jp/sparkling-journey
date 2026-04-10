@@ -78,8 +78,16 @@ export class InMemoryWorkRepository implements WorkRepository {
   }
 
   async searchByText(text: string): Promise<Work[]> {
-    const q = text.toLocaleLowerCase();
-    return this.works.filter((w) => w.title.toLocaleLowerCase().includes(q));
+    const q = text.trim().toLocaleLowerCase();
+    if (!q) return [...this.works];
+    return this.works.filter((w) => {
+      if (w.title.toLocaleLowerCase().includes(q)) return true;
+      return w.workTags.some(
+        (wt) =>
+          wt.tag.name.toLocaleLowerCase().includes(q) ||
+          wt.note.toLocaleLowerCase().includes(q),
+      );
+    });
   }
 }
 
