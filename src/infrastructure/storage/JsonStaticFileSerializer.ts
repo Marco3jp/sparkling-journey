@@ -26,6 +26,9 @@ export class JsonStaticFileSerializer implements StaticFileSerializer {
       version: 1,
       tags: payload.tags,
       works: payload.works,
+      tagRelations: Array.isArray(payload.tagRelations)
+        ? payload.tagRelations
+        : [],
       exportedAt:
         typeof payload.exportedAt === "string" ? payload.exportedAt : "",
     };

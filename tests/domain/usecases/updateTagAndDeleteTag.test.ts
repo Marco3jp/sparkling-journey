@@ -2,10 +2,12 @@ import { describe, it, expect } from "vitest";
 import { updateTag } from "../../../src/domain/usecases/updateTag";
 import { deleteTag } from "../../../src/domain/usecases/deleteTag";
 import {
+  InMemoryTagRelationRepository,
   InMemoryTagRepository,
   InMemoryWorkRepository,
 } from "../../helpers/InMemoryRepositories";
 import type { Tag } from "../../../src/domain/models/Tag";
+import type { TagRelation } from "../../../src/domain/models/TagRelation";
 import type { Work } from "../../../src/domain/models/Work";
 
 const tagA: Tag = { uuid: "t1", name: "Tag A", description: "desc A" };
@@ -36,6 +38,14 @@ const workNoTag: Work = {
   uuid: "w1",
   title: "Work 1",
   workTags: [],
+};
+
+const relationWithTagA: TagRelation = {
+  uuid: "r1",
+  sourceTagId: "t1",
+  targetTagId: "t2",
+  weight: 60,
+  note: "",
 };
 
 describe("updateTag", () => {
@@ -95,8 +105,9 @@ describe("deleteTag", () => {
       structuredClone(tagB),
     ]);
     const workRepo = new InMemoryWorkRepository([]);
+    const relationRepo = new InMemoryTagRelationRepository([]);
 
-    await deleteTag("t1", tagRepo, workRepo);
+    await deleteTag("t1", tagRepo, workRepo, relationRepo);
 
     const stored = await tagRepo.getById("t1");
     expect(stored).toBeNull();
@@ -112,8 +123,9 @@ describe("deleteTag", () => {
       structuredClone(tagB),
     ]);
     const workRepo = new InMemoryWorkRepository([structuredClone(workWithBothTags)]);
+    const relationRepo = new InMemoryTagRelationRepository([]);
 
-    await deleteTag("t1", tagRepo, workRepo);
+    await deleteTag("t1", tagRepo, workRepo, relationRepo);
 
     const updatedWork = await workRepo.getById("w1");
     expect(updatedWork?.workTags).toHaveLength(1);
@@ -126,8 +138,9 @@ describe("deleteTag", () => {
       structuredClone(workWithTagA),
       structuredClone(workWithTagASecond),
     ]);
+    const relationRepo = new InMemoryTagRelationRepository([]);
 
-    await deleteTag("t1", tagRepo, workRepo);
+    await deleteTag("t1", tagRepo, workRepo, relationRepo);
 
     const wa = await workRepo.getById("w1");
     const wb = await workRepo.getById("w2");
@@ -138,8 +151,9 @@ describe("deleteTag", () => {
   it("どの Work にも紐づいていないタグでも削除できる", async () => {
     const tagRepo = new InMemoryTagRepository([structuredClone(tagA)]);
     const workRepo = new InMemoryWorkRepository([structuredClone(workNoTag)]);
+    const relationRepo = new InMemoryTagRelationRepository([]);
 
-    await deleteTag("t1", tagRepo, workRepo);
+    await deleteTag("t1", tagRepo, workRepo, relationRepo);
 
     const stored = await tagRepo.getById("t1");
     expect(stored).toBeNull();
@@ -150,12 +164,29 @@ describe("deleteTag", () => {
   it("存在しない tagId を削除してもエラーにならない", async () => {
     const tagRepo = new InMemoryTagRepository([structuredClone(tagA)]);
     const workRepo = new InMemoryWorkRepository([]);
+    const relationRepo = new InMemoryTagRelationRepository([]);
 
     await expect(
-      deleteTag("non-existent", tagRepo, workRepo),
+      deleteTag("non-existent", tagRepo, workRepo, relationRepo),
     ).resolves.toBeUndefined();
 
     const all = await tagRepo.listAll();
     expect(all).toHaveLength(1);
+  });
+
+  it("タグに紐づいた TagRelation も削除される", async () => {
+    const tagRepo = new InMemoryTagRepository([
+      structuredClone(tagA),
+      structuredClone(tagB),
+    ]);
+    const workRepo = new InMemoryWorkRepository([]);
+    const relationRepo = new InMemoryTagRelationRepository([
+      structuredClone(relationWithTagA),
+    ]);
+
+    await deleteTag("t1", tagRepo, workRepo, relationRepo);
+
+    const relations = await relationRepo.listAll();
+    expect(relations).toHaveLength(0);
   });
 });

@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { TagRelationRepository } from "../../domain/repositories/TagRelationRepository";
 import type { TagRepository } from "../../domain/repositories/TagRepository";
 import type { WorkRepository } from "../../domain/repositories/WorkRepository";
 import type { StaticFileSerializer } from "../../domain/serialization/StaticFileSerializer";
@@ -6,6 +7,7 @@ import type { StaticFileSerializer } from "../../domain/serialization/StaticFile
 export interface Dependencies {
   tagRepository: TagRepository;
   workRepository: WorkRepository;
+  tagRelationRepository: TagRelationRepository;
   serializer: StaticFileSerializer;
 }
 

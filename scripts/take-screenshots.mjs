@@ -29,6 +29,12 @@ const seedTags = [
   { uuid: "t5", name: "ラブコメ", description: "恋愛とコメディが混ざった作品" },
 ];
 
+const seedTagRelations = [
+  { uuid: "r1", sourceTagId: "t1", targetTagId: "t2", weight: 40, note: "異世界 × 科学技術" },
+  { uuid: "r2", sourceTagId: "t1", targetTagId: "t5", weight: 60, note: "ファンタジーラブコメ多い" },
+  { uuid: "r3", sourceTagId: "t3", targetTagId: "t4", weight: 80, note: "日記は短編が多い" },
+];
+
 const seedWorks = [
   {
     uuid: "w1",
@@ -125,11 +131,12 @@ async function main() {
 
     // localStorage にシードデータを注入
     await context.addInitScript(
-      ({ works, tags }) => {
+      ({ works, tags, tagRelations }) => {
         localStorage.setItem("app:works:v1", JSON.stringify(works));
         localStorage.setItem("app:tags:v1", JSON.stringify(tags));
+        localStorage.setItem("app:tag-relations:v1", JSON.stringify(tagRelations));
       },
-      { works: seedWorks, tags: seedTags }
+      { works: seedWorks, tags: seedTags, tagRelations: seedTagRelations }
     );
 
     const page = await context.newPage();
