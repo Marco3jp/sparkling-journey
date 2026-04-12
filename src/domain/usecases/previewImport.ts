@@ -1,4 +1,5 @@
 import type { Tag } from "../models/Tag";
+import type { TagRelation } from "../models/TagRelation";
 import type { Work } from "../models/Work";
 import type { StaticFileSerializer } from "../serialization/StaticFileSerializer";
 
@@ -7,18 +8,22 @@ export interface ImportPreviewResult {
   willOverrideWorks: Work[];
   willCreateTags: Tag[];
   willCreateWorks: Work[];
+  willOverrideTagRelations: TagRelation[];
+  willCreateTagRelations: TagRelation[];
 }
 
 export function previewImport(
   json: string,
   currentTags: Tag[],
   currentWorks: Work[],
+  currentTagRelations: TagRelation[],
   serializer: StaticFileSerializer
 ): ImportPreviewResult {
   const payload = serializer.deserialize(json);
 
   const currentTagMap = new Map(currentTags.map((t) => [t.uuid, t]));
   const currentWorkMap = new Map(currentWorks.map((w) => [w.uuid, w]));
+  const currentRelationMap = new Map(currentTagRelations.map((r) => [r.uuid, r]));
 
   const willOverrideTags: Tag[] = [];
   const willCreateTags: Tag[] = [];
@@ -42,11 +47,24 @@ export function previewImport(
     }
   }
 
+  const willOverrideTagRelations: TagRelation[] = [];
+  const willCreateTagRelations: TagRelation[] = [];
+
+  for (const importedRelation of payload.tagRelations ?? []) {
+    if (currentRelationMap.has(importedRelation.uuid)) {
+      willOverrideTagRelations.push(importedRelation);
+    } else {
+      willCreateTagRelations.push(importedRelation);
+    }
+  }
+
   return {
     willOverrideTags,
     willOverrideWorks,
     willCreateTags,
-    willCreateWorks
+    willCreateWorks,
+    willOverrideTagRelations,
+    willCreateTagRelations,
   };
 }
 

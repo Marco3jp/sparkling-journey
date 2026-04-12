@@ -8,14 +8,14 @@ import { listTags } from "../../domain/usecases/listTags";
 import type { ImportPreviewResult } from "../../domain/usecases/previewImport";
 
 export function SettingsPage() {
-  const { workRepository, tagRepository, serializer } = useDependencies();
+  const { workRepository, tagRepository, tagRelationRepository, serializer } = useDependencies();
   const [importPreview, setImportPreview] = useState<ImportPreviewResult | null>(null);
   const [pendingJson, setPendingJson] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExport = async () => {
-    const json = await exportData(workRepository, tagRepository, serializer);
+    const json = await exportData(workRepository, tagRepository, tagRelationRepository, serializer);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -33,11 +33,12 @@ export function SettingsPage() {
     if (!file) return;
     try {
       const text = await file.text();
-      const [currentTags, currentWorks] = await Promise.all([
+      const [currentTags, currentWorks, currentRelations] = await Promise.all([
         listTags(tagRepository),
         listWorks(workRepository),
+        tagRelationRepository.listAll(),
       ]);
-      const preview = previewImport(text, currentTags, currentWorks, serializer);
+      const preview = previewImport(text, currentTags, currentWorks, currentRelations, serializer);
       setPendingJson(text);
       setImportPreview(preview);
     } catch (err) {
@@ -49,7 +50,7 @@ export function SettingsPage() {
   const handleImportConfirm = async () => {
     if (!pendingJson) return;
     try {
-      await importData(pendingJson, workRepository, tagRepository, serializer);
+      await importData(pendingJson, workRepository, tagRepository, tagRelationRepository, serializer);
       setPendingJson(null);
       setImportPreview(null);
       window.location.reload();
@@ -69,7 +70,9 @@ export function SettingsPage() {
 
   const hasOverrides =
     importPreview &&
-    (importPreview.willOverrideTags.length > 0 || importPreview.willOverrideWorks.length > 0);
+    (importPreview.willOverrideTags.length > 0 ||
+      importPreview.willOverrideWorks.length > 0 ||
+      importPreview.willOverrideTagRelations.length > 0);
 
   return (
     <div>
@@ -101,11 +104,11 @@ export function SettingsPage() {
           <div className="mt-4 p-4 border border-white/30 rounded-lg">
             <h3>プレビュー</h3>
             <p>
-              新規追加: タグ {importPreview.willCreateTags.length} 件、作品 {importPreview.willCreateWorks.length} 件
+              新規追加: タグ {importPreview.willCreateTags.length} 件、作品 {importPreview.willCreateWorks.length} 件、タグ関係 {importPreview.willCreateTagRelations.length} 件
             </p>
             {hasOverrides && (
               <p className="text-yellow-400">
-                上書き: タグ {importPreview.willOverrideTags.length} 件、作品 {importPreview.willOverrideWorks.length} 件
+                上書き: タグ {importPreview.willOverrideTags.length} 件、作品 {importPreview.willOverrideWorks.length} 件、タグ関係 {importPreview.willOverrideTagRelations.length} 件
                 （既存の同じ ID のデータが置き換えられます）
               </p>
             )}

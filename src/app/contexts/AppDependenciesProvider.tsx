@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from "react";
 import { LocalStorageGateway } from "../../infrastructure/storage/LocalStorageGateway";
+import { LocalStorageTagRelationRepository } from "../../infrastructure/storage/LocalStorageTagRelationRepository";
 import { LocalStorageTagRepository } from "../../infrastructure/storage/LocalStorageTagRepository";
 import { LocalStorageWorkRepository } from "../../infrastructure/storage/LocalStorageWorkRepository";
 import { JsonStaticFileSerializer } from "../../infrastructure/storage/JsonStaticFileSerializer";
@@ -11,6 +12,7 @@ export function AppDependenciesProvider({ children }: { children: ReactNode }) {
     return {
       tagRepository: new LocalStorageTagRepository(gateway),
       workRepository: new LocalStorageWorkRepository(gateway),
+      tagRelationRepository: new LocalStorageTagRelationRepository(gateway),
       serializer: new JsonStaticFileSerializer(),
     };
   }, []);

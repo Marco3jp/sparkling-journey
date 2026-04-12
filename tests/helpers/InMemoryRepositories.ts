@@ -1,5 +1,7 @@
 import type { Tag } from "../../src/domain/models/Tag";
+import type { TagRelation } from "../../src/domain/models/TagRelation";
 import type { Work } from "../../src/domain/models/Work";
+import type { TagRelationRepository } from "../../src/domain/repositories/TagRelationRepository";
 import type { TagRepository } from "../../src/domain/repositories/TagRepository";
 import type { WorkRepository } from "../../src/domain/repositories/WorkRepository";
 
@@ -42,6 +44,45 @@ export class InMemoryTagRepository implements TagRepository {
         t.name.toLocaleLowerCase().includes(q) ||
         t.description.toLocaleLowerCase().includes(q)
     );
+  }
+}
+
+export class InMemoryTagRelationRepository implements TagRelationRepository {
+  private relations: TagRelation[];
+
+  constructor(relations: TagRelation[] = []) {
+    this.relations = relations;
+  }
+
+  async getById(id: string): Promise<TagRelation | null> {
+    return this.relations.find((r) => r.uuid === id) ?? null;
+  }
+
+  async listAll(): Promise<TagRelation[]> {
+    return [...this.relations];
+  }
+
+  async listByTagId(tagId: string): Promise<TagRelation[]> {
+    return this.relations.filter(
+      (r) => r.sourceTagId === tagId || r.targetTagId === tagId,
+    );
+  }
+
+  async create(relation: TagRelation): Promise<void> {
+    this.relations.push(relation);
+  }
+
+  async update(relation: TagRelation): Promise<void> {
+    const index = this.relations.findIndex((r) => r.uuid === relation.uuid);
+    if (index === -1) {
+      this.relations.push(relation);
+    } else {
+      this.relations[index] = relation;
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    this.relations = this.relations.filter((r) => r.uuid !== id);
   }
 }
 
