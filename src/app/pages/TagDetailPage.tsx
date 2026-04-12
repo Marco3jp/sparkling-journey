@@ -140,7 +140,7 @@ function RelationRow({
                 key={l}
                 type="button"
                 onClick={() => setEditLevel(l)}
-                className={`w-7 h-7 rounded text-sm ${
+                className={`w-7 h-7 flex items-center justify-center rounded text-sm ${
                   l === editLevel
                     ? "bg-indigo-500 text-white"
                     : "bg-white/10 text-white/70 hover:bg-white/20"
@@ -273,7 +273,7 @@ function AddRelationForm({
                 key={l}
                 type="button"
                 onClick={() => setLevel(l)}
-                className={`w-7 h-7 rounded text-sm ${
+                className={`w-7 h-7 flex items-center justify-center rounded text-sm ${
                   l === level
                     ? "bg-indigo-500 text-white"
                     : "bg-white/10 text-white/70 hover:bg-white/20"
