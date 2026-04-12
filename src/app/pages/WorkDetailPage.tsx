@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDependencies } from "../contexts/useDependencies";
 import { getWorkById } from "../../domain/usecases/getWorkById";
@@ -10,15 +10,41 @@ import { updateWorkTagNote } from "../../domain/usecases/updateWorkTagNote";
 import type { Work } from "../../domain/models/Work";
 import type { Tag } from "../../domain/models/Tag";
 import { LinkifiedText } from "../components/LinkifiedText";
+import { Select } from "../components/Select";
+import type { SelectOption } from "../components/Select";
 
-function filterTagsByQuery(tags: Tag[], query: string): Tag[] {
+const NEW_TAG_VALUE = "__new__";
+
+function buildTagOptions(
+  tags: Tag[],
+  query: string,
+): SelectOption[] {
   const q = query.trim().toLocaleLowerCase();
-  if (!q) return tags;
-  return tags.filter(
-    (t) =>
-      t.name.toLocaleLowerCase().includes(q) ||
-      t.description.toLocaleLowerCase().includes(q),
+  const filtered = q
+    ? tags.filter(
+        (t) =>
+          t.name.toLocaleLowerCase().includes(q) ||
+          t.description.toLocaleLowerCase().includes(q),
+      )
+    : tags;
+
+  const options: SelectOption[] = filtered.map((t) => ({
+    value: t.uuid,
+    label: t.description ? `${t.name} — ${t.description}` : t.name,
+  }));
+
+  const exactMatch = tags.some(
+    (t) => t.name.toLocaleLowerCase() === q,
   );
+  if (q && !exactMatch) {
+    options.unshift({
+      value: NEW_TAG_VALUE,
+      label: `「${query.trim()}」を新規タグとして追加`,
+      labelClassName: "text-sky-300",
+    });
+  }
+
+  return options;
 }
 
 function WorkTagNoteInput({
@@ -89,9 +115,8 @@ export function WorkDetailPage() {
   const [work, setWork] = useState<Work | null>(null);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [linkSearchText, setLinkSearchText] = useState("");
+  const [linkSelectedValue, setLinkSelectedValue] = useState("");
   const [linkNote, setLinkNote] = useState("");
-  const [suggestionOpen, setSuggestionOpen] = useState(false);
-  const suggestionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!uuid) return;
@@ -107,30 +132,11 @@ export function WorkDetailPage() {
 
   const handleLinkTag = async (e: React.FormEvent) => {
     e.preventDefault();
-    const name = linkSearchText.trim();
-    if (!uuid || !name) return;
-    setSuggestionOpen(false);
+    if (!uuid || !linkSelectedValue) return;
     try {
-      const matched = allTags.find(
-        (t) => t.name.toLocaleLowerCase() === name.toLocaleLowerCase(),
-      );
-      const alreadyLinkedIds = new Set(
-        (work?.workTags ?? []).map((wt) => wt.tag.uuid),
-      );
-      const tagToLink =
-        matched && !alreadyLinkedIds.has(matched.uuid)
-          ? matched
-          : null;
-
-      if (tagToLink) {
-        await linkTagToWork(
-          uuid,
-          tagToLink.uuid,
-          linkNote,
-          workRepository,
-          tagRepository,
-        );
-      } else {
+      if (linkSelectedValue === NEW_TAG_VALUE) {
+        const name = linkSearchText.trim();
+        if (!name) return;
         const newTag = await createTag(tagRepository, {
           name,
           description: "",
@@ -142,8 +148,17 @@ export function WorkDetailPage() {
           workRepository,
           tagRepository,
         );
+      } else {
+        await linkTagToWork(
+          uuid,
+          linkSelectedValue,
+          linkNote,
+          workRepository,
+          tagRepository,
+        );
       }
       setLinkSearchText("");
+      setLinkSelectedValue("");
       setLinkNote("");
       reload();
     } catch (err) {
@@ -177,7 +192,7 @@ export function WorkDetailPage() {
 
   const alreadyLinkedIds = new Set(work.workTags.map((wt) => wt.tag.uuid));
   const tagsToAdd = allTags.filter((t) => !alreadyLinkedIds.has(t.uuid));
-  const suggestedTags = filterTagsByQuery(tagsToAdd, linkSearchText);
+  const tagOptions = buildTagOptions(tagsToAdd, linkSearchText);
 
   return (
     <div>
@@ -217,63 +232,31 @@ export function WorkDetailPage() {
       <form onSubmit={handleLinkTag} className="relative">
         <h3>タグを追加</h3>
         <div className="flex flex-wrap gap-3 items-start">
-          <div className="relative" ref={suggestionRef}>
-            <input
-              type="text"
-              value={linkSearchText}
-              onChange={(e) => {
-                setLinkSearchText(e.target.value);
-                setSuggestionOpen(true);
-              }}
-              onFocus={() => setSuggestionOpen(true)}
-              onBlur={() =>
-                setTimeout(() => setSuggestionOpen(false), 150)}
-              placeholder="タグ名で検索 or 新規タグ名を入力"
-              className="w-[280px]"
-              autoComplete="off"
-            />
-            {suggestionOpen && (linkSearchText.trim() || suggestedTags.length > 0) && (
-              <div className="absolute top-full left-0 right-0 mt-0.5 bg-gray-900/98 border border-white/20 rounded-md max-h-[200px] overflow-y-auto z-10 shadow-lg">
-                {suggestedTags.length === 0 ? (
-                  linkSearchText.trim() ? (
-                    <button
-                      type="button"
-                      className="block w-full py-2 px-3 text-left bg-transparent border-none text-sky-300 cursor-pointer"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleLinkTag(e as unknown as React.FormEvent);
-                      }}
-                    >
-                      「{linkSearchText.trim()}」を新規タグとして追加
-                    </button>
-                  ) : null
-                ) : (
-                  suggestedTags.map((t) => (
-                    <button
-                      key={t.uuid}
-                      type="button"
-                      className="block w-full py-2 px-3 text-left bg-transparent border-none text-inherit cursor-pointer"
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        setLinkSearchText(t.name);
-                        setSuggestionOpen(false);
-                      }}
-                    >
-                      {t.name}
-                      {t.description ? ` — ${t.description}` : ""}
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+          <Select
+            value={linkSelectedValue}
+            options={tagOptions}
+            onChange={(val) => {
+              setLinkSelectedValue(val);
+              if (val !== NEW_TAG_VALUE) {
+                const found = tagsToAdd.find((t) => t.uuid === val);
+                if (found) setLinkSearchText(found.name);
+              }
+            }}
+            onQueryChange={setLinkSearchText}
+            valueLabel={
+              linkSelectedValue === NEW_TAG_VALUE ? linkSearchText : undefined
+            }
+            searchable
+            placeholder="タグ名で検索 or 新規タグ名を入力"
+            className="w-[280px]"
+          />
           <input
             value={linkNote}
             onChange={(e) => setLinkNote(e.target.value)}
             placeholder="メモ（任意）"
             className="w-[160px]"
           />
-          <button type="submit" disabled={!linkSearchText.trim()}>
+          <button type="submit" disabled={!linkSelectedValue}>
             追加
           </button>
         </div>
