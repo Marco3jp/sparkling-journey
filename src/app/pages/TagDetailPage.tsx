@@ -11,6 +11,7 @@ import { deleteTagRelation } from "../../domain/usecases/deleteTagRelation";
 import { listTags } from "../../domain/usecases/listTags";
 import type { Tag } from "../../domain/models/Tag";
 import { LinkifiedText } from "../components/LinkifiedText";
+import { Select } from "../components/Select";
 
 function TagDescriptionInput({
   description,
@@ -246,24 +247,25 @@ function AddRelationForm({
     );
   }
 
+  const candidateOptions = candidates.map((t) => ({
+    value: t.uuid,
+    label: t.name,
+  }));
+
   return (
     <form onSubmit={handleSubmit} className="mt-3">
       <div className="flex flex-wrap gap-2 items-end">
         <div>
           <label className="block text-sm text-white/60 mb-1">タグ</label>
-          <select
+          <Select
             value={selectedTagId}
-            onChange={(e) => setSelectedTagId(e.target.value)}
-            className="h-9 px-2 rounded bg-white/10 border border-white/20 text-white text-sm"
-            required
-          >
-            <option value="">選択してください</option>
-            {candidates.map((t) => (
-              <option key={t.uuid} value={t.uuid}>
-                {t.name}
-              </option>
-            ))}
-          </select>
+            options={candidateOptions}
+            onChange={setSelectedTagId}
+            placeholder="選択してください"
+            searchable
+            className="w-44"
+            inputClassName="text-sm"
+          />
         </div>
         <div>
           <label className="block text-sm text-white/60 mb-1">関連度</label>
