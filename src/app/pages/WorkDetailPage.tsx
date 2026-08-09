@@ -132,13 +132,21 @@ export function WorkDetailPage() {
 
   const handleLinkTag = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!uuid || !linkSelectedValue) return;
+    if (!uuid) return;
+    const trimmedText = linkSearchText.trim();
+    let selection = linkSelectedValue;
+    if (!selection && trimmedText) {
+      const exactMatch = allTags.find(
+        (t) => t.name.toLocaleLowerCase() === trimmedText.toLocaleLowerCase(),
+      );
+      selection = exactMatch ? exactMatch.uuid : NEW_TAG_VALUE;
+    }
+    if (!selection) return;
     try {
-      if (linkSelectedValue === NEW_TAG_VALUE) {
-        const name = linkSearchText.trim();
-        if (!name) return;
+      if (selection === NEW_TAG_VALUE) {
+        if (!trimmedText) return;
         const newTag = await createTag(tagRepository, {
-          name,
+          name: trimmedText,
           description: "",
         });
         await linkTagToWork(
@@ -151,7 +159,7 @@ export function WorkDetailPage() {
       } else {
         await linkTagToWork(
           uuid,
-          linkSelectedValue,
+          selection,
           linkNote,
           workRepository,
           tagRepository,
@@ -244,7 +252,9 @@ export function WorkDetailPage() {
             }}
             onQueryChange={setLinkSearchText}
             valueLabel={
-              linkSelectedValue === NEW_TAG_VALUE ? linkSearchText : undefined
+              !linkSelectedValue || linkSelectedValue === NEW_TAG_VALUE
+                ? linkSearchText || undefined
+                : undefined
             }
             searchable
             placeholder="タグ名で検索 or 新規タグ名を入力"
@@ -256,7 +266,10 @@ export function WorkDetailPage() {
             placeholder="メモ（任意）"
             className="w-[160px]"
           />
-          <button type="submit" disabled={!linkSelectedValue}>
+          <button
+            type="submit"
+            disabled={!linkSelectedValue && !linkSearchText.trim()}
+          >
             追加
           </button>
         </div>
