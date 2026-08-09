@@ -21,12 +21,14 @@ function TagDescriptionInput({
   onSave: (next: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(description);
+  const [prevDescription, setPrevDescription] = useState(description);
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  if (description !== prevDescription) {
+    setPrevDescription(description);
     setDraft(description);
-  }, [description]);
+  }
 
   useEffect(() => {
     if (!textareaRef.current) return;
