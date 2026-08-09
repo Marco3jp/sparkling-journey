@@ -63,7 +63,6 @@ export function Select({
     setTimeout(() => {
       setOpen(false);
       setQuery("");
-      onQueryChange?.("");
     }, 150);
   };
 
@@ -71,7 +70,6 @@ export function Select({
     onChange(option.value);
     setOpen(false);
     setQuery("");
-    onQueryChange?.("");
   };
 
   const handleToggle = () => {
