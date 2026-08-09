@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDependencies } from "../contexts/useDependencies";
 import { getWorkById } from "../../domain/usecases/getWorkById";
 import { listTags } from "../../domain/usecases/listTags";
@@ -7,6 +7,7 @@ import { createTag } from "../../domain/usecases/createTag";
 import { linkTagToWork } from "../../domain/usecases/linkTagToWork";
 import { unlinkTagFromWork } from "../../domain/usecases/unlinkTagFromWork";
 import { updateWorkTagNote } from "../../domain/usecases/updateWorkTagNote";
+import { deleteWork } from "../../domain/usecases/deleteWork";
 import type { Work } from "../../domain/models/Work";
 import type { Tag } from "../../domain/models/Tag";
 import { LinkifiedText } from "../components/LinkifiedText";
@@ -113,6 +114,7 @@ function WorkTagNoteInput({
 
 export function WorkDetailPage() {
   const { uuid } = useParams<"uuid">();
+  const navigate = useNavigate();
   const { workRepository, tagRepository } = useDependencies();
   const [work, setWork] = useState<Work | null>(null);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -182,6 +184,21 @@ export function WorkDetailPage() {
     reload();
   };
 
+  const handleDelete = async () => {
+    if (!uuid || !work) return;
+
+    const tagCount = work.workTags.length;
+    const message =
+      tagCount > 0
+        ? `この作品には ${tagCount} 件のタグが紐付いています。\n作品を削除するとタグの紐付けも解除されます。\n削除してもよいですか？`
+        : "この作品を削除しますか？";
+
+    if (!window.confirm(message)) return;
+
+    await deleteWork(uuid, workRepository);
+    navigate("/");
+  };
+
   const handleNoteChange = async (tagId: string, note: string) => {
     if (!uuid) return;
     try {
@@ -209,7 +226,16 @@ export function WorkDetailPage() {
       <p className="mb-2">
         <Link to="/">← Home</Link>
       </p>
-      <h1 className="mt-0">{work.title}</h1>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="mt-0">{work.title}</h1>
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="shrink-0 text-red-400 border-red-400/60 hover:bg-red-400/10"
+        >
+          削除
+        </button>
+      </div>
       <section className="mb-6">
         <h2>紐付いたタグ</h2>
         {work.workTags.length === 0 ? (
