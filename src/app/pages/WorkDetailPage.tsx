@@ -55,12 +55,14 @@ function WorkTagNoteInput({
   onSave: (nextNote: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(note);
+  const [prevNote, setPrevNote] = useState(note);
   const [isEditing, setIsEditing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
+  if (note !== prevNote) {
+    setPrevNote(note);
     setDraft(note);
-  }, [note]);
+  }
 
   useEffect(() => {
     if (!textareaRef.current) return;
