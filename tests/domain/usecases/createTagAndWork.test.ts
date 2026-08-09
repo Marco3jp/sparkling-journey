@@ -1,10 +1,20 @@
 import { describe, it, expect } from "vitest";
 import { createTag } from "../../../src/domain/usecases/createTag";
-import { createWork } from "../../../src/domain/usecases/createWork";
+import {
+  createWork,
+  DuplicateWorkTitleError,
+} from "../../../src/domain/usecases/createWork";
+import type { Work } from "../../../src/domain/models/Work";
 import {
   InMemoryTagRepository,
   InMemoryWorkRepository,
 } from "../../helpers/InMemoryRepositories";
+
+const existingWork: Work = {
+  uuid: "existing-work",
+  title: "同名の作品",
+  workTags: [],
+};
 
 describe("createTag", () => {
   it("name と description を trim して Tag を生成・保存する", async () => {
@@ -91,6 +101,40 @@ describe("createWork", () => {
     await createWork(workRepo, { title: "Work1" });
     await createWork(workRepo, { title: "Work2" });
 
+    const all = await workRepo.listAll();
+    expect(all).toHaveLength(2);
+  });
+
+  it("同じ title の作品を作成しようとすると DuplicateWorkTitleError を投げる", async () => {
+    const workRepo = new InMemoryWorkRepository([existingWork]);
+
+    await expect(
+      createWork(workRepo, { title: "同名の作品" }),
+    ).rejects.toBeInstanceOf(DuplicateWorkTitleError);
+
+    const all = await workRepo.listAll();
+    expect(all).toHaveLength(1);
+  });
+
+  it("trim 後に既存 title と一致する場合も DuplicateWorkTitleError を投げる", async () => {
+    const workRepo = new InMemoryWorkRepository([existingWork]);
+
+    await expect(
+      createWork(workRepo, { title: "  同名の作品  " }),
+    ).rejects.toBeInstanceOf(DuplicateWorkTitleError);
+
+    const all = await workRepo.listAll();
+    expect(all).toHaveLength(1);
+  });
+
+  it("大文字小文字が異なる場合は別 title として作成できる", async () => {
+    const workRepo = new InMemoryWorkRepository([
+      { uuid: "w-lower", title: "naruto", workTags: [] },
+    ]);
+
+    const work = await createWork(workRepo, { title: "Naruto" });
+
+    expect(work.title).toBe("Naruto");
     const all = await workRepo.listAll();
     expect(all).toHaveLength(2);
   });

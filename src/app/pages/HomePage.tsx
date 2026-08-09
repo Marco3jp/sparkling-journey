@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import { useDependencies } from "../contexts/useDependencies";
 import { listWorks } from "../../domain/usecases/listWorks";
 import { listTags } from "../../domain/usecases/listTags";
-import { createWork } from "../../domain/usecases/createWork";
+import {
+  createWork,
+  DuplicateWorkTitleError,
+} from "../../domain/usecases/createWork";
 import { createTag } from "../../domain/usecases/createTag";
 import type { Work } from "../../domain/models/Work";
 import type { Tag } from "../../domain/models/Tag";
@@ -16,6 +19,7 @@ export function HomePage() {
   const [showWorkForm, setShowWorkForm] = useState(false);
   const [showTagForm, setShowTagForm] = useState(false);
   const [workTitle, setWorkTitle] = useState("");
+  const [workError, setWorkError] = useState<string | null>(null);
   const [tagName, setTagName] = useState("");
   const [tagDesc, setTagDesc] = useState("");
 
@@ -31,10 +35,19 @@ export function HomePage() {
   const handleCreateWork = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!workTitle.trim()) return;
-    await createWork(workRepository, { title: workTitle });
-    setWorkTitle("");
-    setShowWorkForm(false);
-    load();
+    try {
+      await createWork(workRepository, { title: workTitle });
+      setWorkTitle("");
+      setWorkError(null);
+      setShowWorkForm(false);
+      load();
+    } catch (err) {
+      if (err instanceof DuplicateWorkTitleError) {
+        setWorkError(err.message);
+        return;
+      }
+      throw err;
+    }
   };
 
   const handleCreateTag = async (e: React.FormEvent) => {
@@ -65,15 +78,33 @@ export function HomePage() {
         >
           <input
             value={workTitle}
-            onChange={(e) => setWorkTitle(e.target.value)}
+            onChange={(e) => {
+              setWorkTitle(e.target.value);
+              if (workError) setWorkError(null);
+            }}
             placeholder="作品タイトル"
             autoFocus
             className="min-w-[200px]"
+            aria-invalid={workError ? true : undefined}
           />
           <button type="submit">作成</button>
-          <button type="button" onClick={() => setShowWorkForm(false)}>
+          <button
+            type="button"
+            onClick={() => {
+              setShowWorkForm(false);
+              setWorkError(null);
+            }}
+          >
             キャンセル
           </button>
+          {workError ? (
+            <p
+              role="alert"
+              className="basis-full m-0 text-sm text-red-400"
+            >
+              {workError}
+            </p>
+          ) : null}
         </form>
       )}
       {showTagForm && (
